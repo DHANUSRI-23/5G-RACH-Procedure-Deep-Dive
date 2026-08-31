@@ -2,77 +2,96 @@
 
 ## Contention-Based Random Access Capture and Msg1–Msg4 Timing Analysis
 
-## Overview
-
-This project investigates the 5G Standalone (5G SA) UE registration
-procedure using UERANSIM and Open5GS.
-
-Wireshark is used to capture and analyse the signalling traffic,
-including NGAP, NAS and UERANSIM Radio Link Simulation (RLS) traffic.
-
-The project focuses on understanding the relationship between the
-contention-based Random Access procedure and the subsequent UE
-registration signalling.
+> A practical 5G Standalone (5G SA) signalling analysis project using **UERANSIM, Open5GS and Wireshark** to investigate UE registration, Random Access-related activity, NGAP/NAS signalling, timing behaviour and multi-UE registration.
 
 ---
 
-## Objectives
+## 📌 Overview
 
-- Trigger UE registration using UERANSIM and Open5GS
-- Capture NGAP and NAS signalling using Wireshark
-- Observe UERANSIM Radio Link Simulation traffic
-- Analyse the InitialUEMessage and Registration Request
-- Analyse signalling timing
+The **Random Access Channel (RACH)** procedure is an important part of 5G NR because it allows a UE to establish uplink synchronisation and gain access to the network.
+
+This project performs a practical investigation of the **5G Standalone UE registration procedure** using a simulated 5G environment consisting of:
+
+- **UERANSIM** – 5G UE and gNB simulator
+- **Open5GS** – 5G Core Network
+- **Wireshark** – packet capture and protocol analysis
+
+The experiment focuses on studying the relationship between the simulated radio-link activity and the subsequent **NGAP and NAS signalling** involved in UE registration.
+
+Multiple UEs were configured and tested to analyse their individual registration procedures and timing behaviour.
+
+---
+
+# 🎯 Objectives
+
+The main objectives of this project are:
+
+- Simulate UE registration using UERANSIM and Open5GS
+- Capture signalling traffic using Wireshark
+- Observe UERANSIM Radio Link Simulation (RLS) traffic
+- Analyse NGAP and NAS signalling
+- Identify the `InitialUEMessage`
+- Analyse the NAS `Registration Request`
+- Study Authentication signalling
+- Study Security Mode procedures
+- Analyse Initial Context Setup
+- Analyse PDU Session Resource Setup
+- Perform packet timing analysis
 - Configure and test multiple UEs
-- Study multi-UE registration behaviour
-- Document the limitations of observing physical RACH parameters
-  through a simulated software stack
+- Analyse multi-UE registration behaviour
+- Investigate the contention-based Random Access procedure
+- Document the limitations of observing physical RACH parameters in a software-based simulation
 
 ---
 
-## Technology Stack
+# 🛠️ Technology Stack
 
 | Component | Version / Description |
 |---|---|
 | UERANSIM | v3.3.0 |
-| Open5GS | 5G SA Core |
+| Open5GS | 5G SA Core Network |
 | Wireshark | 3.6.2 |
-| Operating System | Ubuntu |
+| Operating System | Ubuntu Linux |
+| Virtualization | VirtualBox |
 | Radio Link | UERANSIM RLS |
-| Protocols | NGAP, NAS, SCTP, RLS |
+| Signalling | NGAP, NAS, SCTP |
+| Simulation Traffic | UDP / RLS |
 
 ---
 
-## Network Configuration
-
-### gNB
+# 🏗️ System Architecture
 
 ```text
-MCC: 999
-MNC: 70
-TAC: 1
-gNB IP: 127.0.0.1
-AMF IP: 127.0.0.5
-AMF Port: 38412
+                         ┌──────────────────────┐
+                         │       Open5GS        │
+                         │      5G Core         │
+                         │                      │
+                         │ AMF / SMF / UPF etc. │
+                         └──────────┬───────────┘
+                                    │
+                                 NGAP/SCTP
+                                    │
+                         ┌──────────▼───────────┐
+                         │       UERANSIM       │
+                         │         gNB           │
+                         └──────────┬───────────┘
+                                    │
+                              RLS / UDP
+                                    │
+                ┌───────────────────┼───────────────────┐
+                │                   │                   │
+          ┌─────▼─────┐       ┌─────▼─────┐       ┌─────▼─────┐
+          │    UE1    │       │    UE2    │       │    UE3    │
+          │            │       │            │       │            │
+          │ IMSI ...001│       │ IMSI ...002│       │ IMSI ...003│
+          └────────────┘       └────────────┘       └────────────┘
 
-
-### UE Configuration
-
-Three UEs were configured for the experiment:
-
-| UE | SUPI |
-|---|---|
-| UE1 | imsi-999700000000001 |
-| UE2 | imsi-999700000000002 |
-| UE3 | imsi-999700000000003 |
-
-All UEs use MCC `999`, MNC `70`, and the same test subscription credentials configured in Open5GS.
-
----
-
-## Setup
-
-### 1. Start Open5GS
+                                    │
+                                    ▼
+                              ┌────────────┐
+                              │ Wireshark  │
+                              │  Capture   │
+                              └────────────┘
 
 Verify that the required Open5GS services are running:
 
